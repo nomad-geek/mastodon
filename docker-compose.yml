@@ -39,7 +39,7 @@ services:
 
   web:
     #build: .
-    image: ghcr.io/mastodon/mastodon:v4.2.0
+    image: ghcr.io/mastodon/mastodon:v4.2.1
     restart: unless-stopped
     env_file: .env.production
     command: bundle exec puma -C config/puma.rb
