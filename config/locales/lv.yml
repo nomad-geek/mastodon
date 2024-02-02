@@ -1014,8 +1014,6 @@ lv:
       new_trending_statuses:
         title: Populārākās ziņas
       new_trending_tags:
-        no_approved_tags: Pašlaik nav apstiprinātu tendenču tēmturu.
-        requirements: 'Jebkurš no šiem kandidātiem varētu pārspēt #%{rank} apstiprināto populāro tēmturi, kas pašlaik ir #%{lowest_tag_name} ar rezultātu %{lowest_tag_score}.'
         title: Populārākie tēmturi
       subject: Tiek pārskatītas jaunas tendences %{instance}
   aliases:
@@ -1805,7 +1803,6 @@ lv:
     webauthn: Drošības atslēgas
   user_mailer:
     appeal_approved:
-      action: Dodies uz savu kontu
       explanation: Apelācija par brīdinājumu jūsu kontam %{strike_date}, ko iesniedzāt %{appeal_date}, ir apstiprināta. Jūsu konts atkal ir labā stāvoklī.
       subject: Jūsu %{date} apelācija ir apstiprināta
       title: Apelācija apstiprināta
@@ -1814,7 +1811,6 @@ lv:
       subject: Jūsu %{date} apelācija ir noraidīta
       title: Apelācija noraidīta
     backup_ready:
-      explanation: Tu pieprasīji pilnu sava Mastodon konta dublējumu. Tagad tas ir gatavs lejupielādei!
       subject: Tavs arhīvs ir gatavs lejupielādei
       title: Arhīva līdzņemšana
     suspicious_sign_in:
