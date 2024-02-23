@@ -25,6 +25,12 @@ services:
       - "cluster.name=es-mastodon"
       - "discovery.type=single-node"
       - "thread_pool.write.queue_size=1000"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
     networks:
        - backend
     healthcheck:
@@ -43,9 +49,9 @@ services:
     hostname: "es"
 
   web:
-    #build: .
-    #image: ghcr.io/mastodon/mastodon:v4.2.1
-    image: mglennon/mastodon:${MY_PACKAGE}
+    build: .
+    #image: ghcr.io/mastodon/mastodon:v4.2.7
+    #image: mglennon/mastodon:${MY_PACKAGE}
     restart: unless-stopped
     env_file: .env.production
     command: bundle exec puma -C config/puma.rb
@@ -61,9 +67,11 @@ services:
     hostname: "mastoweb"
 
   streaming:
-    #build: .
-    #image: ghcr.io/mastodon/mastodon:v4.2.1
-    image: mglennon/mastodon:${MY_PACKAGE}
+    build:
+      dockerfile: ./streaming/Dockerfile
+      context: .
+    #image: ghcr.io/mastodon/mastodon:v4.2.7
+    #image: mglennon/mastodon:${MY_PACKAGE}
     restart: unless-stopped
     env_file: .env.production
     command: node ./streaming
@@ -77,9 +85,9 @@ services:
     hostname: "mastostreaming"
 
   sidekiq:
-    #build: .
-    #image: ghcr.io/mastodon/mastodon:v4.2.1
-    image: mglennon/mastodon:${MY_PACKAGE}
+    build: .
+    #image: ghcr.io/mastodon/mastodon:v4.2.7
+    #image: mglennon/mastodon:${MY_PACKAGE}
     restart: unless-stopped
     env_file: .env.production
     command: bundle exec sidekiq
@@ -97,7 +105,7 @@ services:
     networks:
       - backend
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1"]
     volumes:
       - mastodon_redis:/data
   
