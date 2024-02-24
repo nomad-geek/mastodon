@@ -109,7 +109,7 @@ services:
     networks:
       - backend
     healthcheck:
-      test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1"]
+      test: ["CMD", "redis-cli", "ping"]
     volumes:
       - mastodon_redis:/data
     labels:
