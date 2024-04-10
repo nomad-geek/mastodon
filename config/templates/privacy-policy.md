@@ -6,6 +6,8 @@ information and how you can access and update this information. This policy
 does not apply to the practices of companies that dftba.club does not own
 or control, or to individuals that dftba.club does not employ or manage.
 
+This server is located within and is governed by the laws of the United States. 
+
 # What information do we collect?
 
 - **Basic account information**: If you register on this server, you may be
