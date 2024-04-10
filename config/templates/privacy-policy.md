@@ -117,8 +117,6 @@ least 13 years old. If you are under the age of 13, per the
 requirements of COPPA (Children's Online Privacy Protection Act) do not use this
 site.
 
-Law requirements can be different if this server is in another jurisdiction.
-
 ---
 
 This document is CC-BY-SA. Originally adapted from the [Discourse privacy
