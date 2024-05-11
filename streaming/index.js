@@ -802,9 +802,10 @@ const startServer = async () => {
    * @param {undefined | function(string[], SubscriptionListener): void} attachCloseHandler
    * @param {'websocket' | 'eventsource'} destinationType
    * @param {boolean=} needsFiltering
+   * @param {boolean=} allowLocalOnly
    * @returns {SubscriptionListener}
    */
-  const streamFrom = (channelIds, req, log, output, attachCloseHandler, destinationType, needsFiltering = false) => {
+  const streamFrom = (channelIds, req, log, output, attachCloseHandler, destinationType, needsFiltering = false, allowLocalOnly = false) => {
     log.info({ channelIds }, `Starting stream`);
 
     /**
@@ -833,6 +834,12 @@ const startServer = async () => {
       }
 
       const { event, payload } = message;
+
+      // Only send local-only statuses to logged-in users
+      if ((event === 'update' || event === 'status.update') && payload.local_only && !(req.accountId && allowLocalOnly)) {
+        log.debug(`Message ${payload.id} filtered because it was local-only`);
+        return;
+      }
 
       // Streaming only needs to apply filtering to some channels and only to
       // some events. This is because majority of the filtering happens on the
@@ -1157,7 +1164,7 @@ const startServer = async () => {
       const onEnd = streamHttpEnd(req, subscriptionHeartbeat(channelIds));
 
       // @ts-ignore
-      streamFrom(channelIds, req, req.log, onSend, onEnd, 'eventsource', options.needsFiltering);
+      streamFrom(channelIds, req, req.log, onSend, onEnd, 'eventsource', options.needsFiltering, options.allowLocalOnly);
     }).catch(err => {
       const {statusCode, errorMessage } = extractErrorStatusAndMessage(err);
 
@@ -1204,63 +1211,77 @@ const startServer = async () => {
     case 'user':
       resolve({
         channelIds: channelsForUserStream(req),
-        options: { needsFiltering: false },
+        options: { needsFiltering: false, allowLocalOnly: true },
       });
 
       break;
     case 'user:notification':
       resolve({
         channelIds: [`timeline:${req.accountId}:notifications`],
-        options: { needsFiltering: false },
+        options: { needsFiltering: false, allowLocalOnly: true },
       });
 
       break;
     case 'public':
       resolve({
         channelIds: ['timeline:public'],
-        options: { needsFiltering: true },
+        options: { needsFiltering: true, allowLocalOnly: isTruthy(params.allow_local_only) },
+      });
+
+      break;
+    case 'public:allow_local_only':
+      resolve({
+        channelIds: ['timeline:public'],
+        options: { needsFiltering: true, allowLocalOnly: true },
       });
 
       break;
     case 'public:local':
       resolve({
         channelIds: ['timeline:public:local'],
-        options: { needsFiltering: true },
+        options: { needsFiltering: true, allowLocalOnly: true },
       });
 
       break;
     case 'public:remote':
       resolve({
         channelIds: ['timeline:public:remote'],
-        options: { needsFiltering: true },
+        options: { needsFiltering: true, allowLocalOnly: false },
       });
 
       break;
     case 'public:media':
       resolve({
         channelIds: ['timeline:public:media'],
-        options: { needsFiltering: true },
+        options: { needsFiltering: true, allowLocalOnly: isTruthy(params.allow_local_only) },
+      });
+
+      break;
+    case 'public:allow_local_only:media':
+      resolve({
+        channelIds: ['timeline:public:media'],
+        options: { needsFiltering: true, allowLocalOnly: true },
       });
 
       break;
     case 'public:local:media':
       resolve({
         channelIds: ['timeline:public:local:media'],
-        options: { needsFiltering: true },
+        options: { needsFiltering: true, allowLocalOnly: true },
       });
 
       break;
     case 'public:remote:media':
       resolve({
         channelIds: ['timeline:public:remote:media'],
-        options: { needsFiltering: true },
+        options: { needsFiltering: true, allowLocalOnly: false },
       });
 
       break;
     case 'direct':
       resolve({
         channelIds: [`timeline:direct:${req.accountId}`],
-        options: { needsFiltering: false },
+        options: { needsFiltering: false, allowLocalOnly: true },
       });
 
       break;
@@ -1270,7 +1291,7 @@ const startServer = async () => {
       } else {
         resolve({
           channelIds: [`timeline:hashtag:${normalizeHashtag(params.tag)}`],
-          options: { needsFiltering: true },
+          options: { needsFiltering: true, allowLocalOnly: true },
         });
       }
 
@@ -1281,7 +1302,7 @@ const startServer = async () => {
       } else {
         resolve({
           channelIds: [`timeline:hashtag:${normalizeHashtag(params.tag)}:local`],
-          options: { needsFiltering: true },
+          options: { needsFiltering: true, allowLocalOnly: true },
         });
       }
 
@@ -1295,7 +1316,7 @@ const startServer = async () => {
       authorizeListAccess(params.list, req).then(() => {
         resolve({
           channelIds: [`timeline:list:${params.list}`],
-          options: { needsFiltering: false },
+          options: { needsFiltering: false, allowLocalOnly: true },
         });
       }).catch(() => {
         reject(new AuthenticationError('Not authorized to stream this list'));
@@ -1347,7 +1368,7 @@ const startServer = async () => {
 
       const onSend = streamToWs(request, websocket, streamNameFromChannelName(channelName, params));
       const stopHeartbeat = subscriptionHeartbeat(channelIds);
-      const listener = streamFrom(channelIds, request, logger, onSend, undefined, 'websocket', options.needsFiltering);
+      const listener = streamFrom(channelIds, request, logger, onSend, undefined, 'websocket', options.needsFiltering, options.allowLocalOnly);
 
       connectedChannels.labels({ type: 'websocket', channel: channelName }).inc();
 

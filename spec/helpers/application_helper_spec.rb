@@ -16,12 +16,14 @@ describe ApplicationHelper do
       def controller_helpers
         Module.new do
           def body_class_string = 'modal-layout compose-standalone'
+          def body_class_string = 'modal-layout compose-standalone'
 
           def current_account
             @current_account ||= Fabricate(:account)
           end
 
-          def current_theme = 'default'
+          def current_flavour = 'glitch'
+          def current_skin = 'default'
         end
       end
     end
@@ -282,6 +284,30 @@ describe ApplicationHelper do
 
         expect(helper.html_title).to eq 'Site Title'
         expect(helper.html_title).to be_html_safe
+      end
+    end
+  end
+
+  describe '#site_icon_path' do
+    context 'when an icon exists' do
+      let!(:favicon) { Fabricate(:site_upload, var: 'favicon') }
+
+      it 'returns the URL of the icon' do
+        expect(helper.site_icon_path('favicon')).to eq(favicon.file.url('48'))
+      end
+
+      it 'returns the URL of the icon with size parameter' do
+        expect(helper.site_icon_path('favicon', 16)).to eq(favicon.file.url('16'))
+      end
+    end
+
+    context 'when an icon does not exist' do
+      it 'returns nil' do
+        expect(helper.site_icon_path('favicon')).to be_nil
+      end
+
+      it 'returns nil with size parameter' do
+        expect(helper.site_icon_path('favicon', 16)).to be_nil
       end
     end
   end

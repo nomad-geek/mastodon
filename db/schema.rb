@@ -1019,6 +1019,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_22_161611) do
     t.text "spoiler_text", default: "", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "content_type"
     t.bigint "ordered_media_attachment_ids", array: true
     t.text "media_descriptions", array: true
     t.string "poll_options", array: true
@@ -1075,7 +1076,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_22_161611) do
     t.bigint "account_id", null: false
     t.bigint "application_id"
     t.bigint "in_reply_to_account_id"
+    t.boolean "local_only"
     t.bigint "poll_id"
+    t.string "content_type"
     t.datetime "deleted_at", precision: nil
     t.datetime "edited_at", precision: nil
     t.boolean "trendable"
@@ -1199,6 +1202,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_03_22_161611) do
     t.bigint "role_id"
     t.text "settings"
     t.string "time_zone"
+    t.string "otp_secret"
     t.index ["account_id"], name: "index_users_on_account_id"
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["created_by_application_id"], name: "index_users_on_created_by_application_id", where: "(created_by_application_id IS NOT NULL)"
